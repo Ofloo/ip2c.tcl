@@ -1,0 +1,2 @@
+Edit ip2c.tcl change variable mirror to your preference 
+then type tclsh install.tcl
