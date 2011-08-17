@@ -58,7 +58,93 @@ namespace eval ip2c {
         }
       }
     }
-    if {![info exists    foreach {x} [array names short] {
+    if {![info exists ip]} {set ip {}}
+    set out "0"
+    if {[ip::is ipv4 $ip] || [ip::is ipv6 $ip] || ($ip == "")} {
+      set tok [http::geturl http://${api}/csv/${ip}]
+      set dat [http::data $tok]
+      http::cleanup $tok
+      cleanup
+      foreach {-> ip a02 a03 coun reg time} [regexp -all -nocase -inline {"(.*?)","([a-z]{2})","([a-z]{3})","(.*?)","([a-z]+)","([0-9]+)"} $dat] {
+        array set registry [list $out $reg]
+        array set assigned [list $out $time]
+        array set short [list $out $a02]
+        array set long [list $out $a03]
+        array set country [list $out $coun]
+        array set address [list $out [ip::prefix $ip]]
+        incr out
+      }
+    } else {
+      return -1
+    }
+    return $out
+  }
+
+  #
+  # address
+  # returns: IP where the lookup was made upon
+  #
+
+  proc address {}  {
+    variable address
+    set out {}
+    foreach {x} [array names address] {
+      lappend out $address($x)
+      break
+    }
+    return $out
+  }
+
+  #
+  # country
+  # returns: Full name country name
+  #
+
+  proc country {}  {
+    variable country
+    set out {}
+    foreach {x} [array names country] {
+      lappend out $country($x)
+    }
+    return $out
+  }
+
+  #
+  # assigned
+  # returns: The time in seconds when the space was allocated
+  #
+
+  proc assigned {}  {
+    variable assigned
+    set out {}
+    foreach {x} [array names assigned] {
+      lappend out $assigned($x)
+    }
+    return $out
+  }
+
+  #
+  # abbr ?-short|-long?
+  # returns: Country abbreviation when -short 2 char type is returned when -long 3 char
+  # type is returned when null all types are returned
+  #
+
+  proc abbr {{type {}}}  {
+    variable long; variable short
+    set out {}
+    switch -- $type {
+      "-short" {
+        foreach {x} [array names short] {
+          lappend out $short($x)
+        }
+      }
+      "-long" {
+        foreach {x} [array names long] {
+          lappend out $long($x)
+        }
+      }
+      default {
+        foreach {x} [array names short] {
           lappend out $short($x)
           lappend out $long($x)
         }
@@ -102,4 +188,3 @@ namespace eval ip2c {
 }
 
 package provide ip2c $::ip2c::version
-
