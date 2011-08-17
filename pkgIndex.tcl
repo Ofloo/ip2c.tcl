@@ -22,4 +22,4 @@
 #   
 ################################################################################
 
-package ifneeded ip2c 0.1 [list source [file join $dir ip2c.tcl]]
+package ifneeded ip2c 1.1 [list source [file join $dir ip2c.tcl]]
