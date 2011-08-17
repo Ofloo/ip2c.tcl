@@ -1,2 +1,11 @@
 Edit ip2c.tcl change variable mirror to your preference 
 then type tclsh install.tcl
+
+manual install
+
+open tclsh shell type
+
+set tcl_pkgPath
+mkdir ip2c in that path then copy ip2c.tcl and pkgIndex.tcl to that directory, .. 
+and that's it.
+
