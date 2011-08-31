@@ -29,7 +29,7 @@ namespace eval ip2c {
   package require ip
 
   variable api "api.ip2c.info"
-  variable version 1.2
+  variable version 1.2.1
 
   variable registry
   variable assigned
@@ -61,17 +61,30 @@ namespace eval ip2c {
     if {![info exists ip]} {set ip {}}
     set out "0"
     if {[ip::is ipv4 $ip] || [ip::is ipv6 $ip] || ($ip == "")} {
-      set tok [http::geturl http://${api}/csv/${ip}]
-      switch -glob -- [http::ncode $tok] {
-        30[1237] {
-          upvar #0 $tok state
-          array set meta $state(meta)
-          if {[info exists meta(Location)]} {
-            http::cleanup $tok
-            set tok [http::geturl $meta(Location)]
+      set url "http://${api}/csv/${ip}"
+      while {1} {
+        set tok [http::geturl $url]
+        switch -glob -- [http::ncode $tok] {
+          30[1237] {
+            upvar #0 $tok state
+            array set meta $state(meta)
+            if {[info exists meta(Location)]} {
+              if {![string equal {} $meta(Location)]} {
+                set url [split $meta(Location)]
+                http::cleanup $tok
+              } else {
+                break
+              }
+            } else {
+              break
+            }
+          }
+          default {
+            break
           }
         }
       }
+
       set dat [http::data $tok]
       http::cleanup $tok
       cleanup
