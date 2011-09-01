@@ -63,25 +63,28 @@ namespace eval ip2c {
     if {[ip::is ipv4 $ip] || [ip::is ipv6 $ip] || ($ip == "")} {
       set url "http://${api}/csv/${ip}"
       while {1} {
-        set tok [http::geturl $url]
-        switch -glob -- [http::ncode $tok] {
-          30[1237] {
-            upvar #0 $tok state
-            array set meta $state(meta)
-            if {[info exists meta(Location)]} {
-              if {![string equal {} $meta(Location)]} {
-                set url [split $meta(Location)]
-                http::cleanup $tok
+        if {![catch {http::geturl $url} tok]} {
+          switch -glob -- [http::ncode $tok] {
+            30[1237] {
+              upvar #0 $tok state
+              array set meta $state(meta)
+              if {[info exists meta(Location)]} {
+                if {![string equal {} $meta(Location)]} {
+                  set url [split $meta(Location)]
+                  http::cleanup $tok
+                } else {
+                  break
+                }
               } else {
                 break
               }
-            } else {
+            }
+            default {
               break
             }
           }
-          default {
-            break
-          }
+        } else {
+          break
         }
       }
 
