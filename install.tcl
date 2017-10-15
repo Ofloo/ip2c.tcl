@@ -1,4 +1,4 @@
-#!/usr/local/bin/tclsh8.5
+#!/usr/bin/env tclsh
 ################################################################################
 #
 #  TCL scripts by Ofloo all rights reserved.
